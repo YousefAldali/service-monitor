@@ -63,6 +63,18 @@ checkAllServices().then(results => {
 // then run all checks every 30 seconds
 setInterval(async () => {
   latestResults = await checkAllServices();
+// store the results in history
+  latestResults.forEach(result => {
+    if (!history[result.name]) {
+      history[result.name] = [];
+    }
+    // keep only the last 100 results for each service
+    history[result.name].push(result);
+    if (history[result.name].length > 100) {
+      history[result.name].shift();
+    }
+  });
+
   console.log("Checks updated at", new Date().toISOString());
 }, 30000);
 
@@ -71,3 +83,11 @@ app.get("/status", (req, res) => {
   res.json(latestResults);
 });
 
+
+
+// return the check history for a single service by name
+app.get("/history/:name", (req, res) => {
+  const name = req.params.name;
+  const serviceHistory = history[name] || [];
+  res.json(serviceHistory);
+});
