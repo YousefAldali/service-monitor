@@ -1,0 +1,24 @@
+{
+    "services": [
+        {
+            "name": "Not a Real Site",
+            "URL": "https://not-a-real-site-9f8g7h.com"
+        },
+        {
+            "name": "Hugging Face",
+            "URL": "https://huggingface.co/"
+        },
+        {
+            "name": "GitHub",
+            "URL": "https://github.com/"
+        },
+        {
+            "name": "Kaggle",
+            "URL": "https://www.kaggle.com/"
+        },
+        {
+            "name": "Google",
+            "URL": "https://www.google.com/"
+        }
+    ]
+}
