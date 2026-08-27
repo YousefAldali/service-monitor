@@ -1,6 +1,11 @@
 const express = require('express');      // calling the express module
 const config = require('./config.json'); // calling the config.json file 
 const app = express();                  // creating an express app
+const cors = require('cors');                 
+app.use(cors());                          // enable CORS for all routes 
+// this is needed because the frontend and backend are on different ports (3000 and 4000)
+// this allows the frontend to make requests to the backend without being blocked by the browser's same-origin policy
+
 let latestResults = [];
 let history = {};
 
