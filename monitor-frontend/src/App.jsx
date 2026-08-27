@@ -8,8 +8,9 @@ function App() {
     // a function that fetches the status from the backend
     const fetchStatus = async () => {
       try {
-        const response = await fetch("http://localhost:4000/status"); // fetch the status from the backend in defferent port (4000) than the frontend (3000)
-        const data = await response.json(); // parse the JSON response
+        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:4000"; // use the environment variable if it exists, otherwise default to localhost
+        const response = await fetch(`${apiUrl}/status`); // fetch the status from the backend
+        const data = await response.json();
         setServices(data);
       } catch (error) { // if the fetch fails, log the error
         console.error("Failed to fetch status:", error);
