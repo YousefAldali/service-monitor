@@ -1,0 +1,17 @@
+# Backend ConfigMap dose not contain any sensitive information, so it is safe to store it in a ConfigMap.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  config.json: |
+    {
+      "port": 4000,
+      "services": [
+        { "name": "Not a Real Site", "URL": "https://not-a-real-site-9f8g7h.com" },
+        { "name": "Hugging Face", "URL": "https://huggingface.co/" },
+        { "name": "GitHub", "URL": "https://github.com/" },
+        { "name": "Kaggle", "URL": "https://www.kaggle.com/" },
+        { "name": "Google", "URL": "https://www.google.com/" }
+      ]
+    }
