@@ -21,6 +21,17 @@ h1 {
   border-radius: 8px;
   padding: 1rem;
   background: #1e1e1e;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.card.selected {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
 }
 
 .card.up {
@@ -41,6 +52,26 @@ h1 {
 
 .card.down .status {
   color: #ef4444;
+}
+
+.card-hint {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.chart-panel {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 0 0 8px 8px;
+  padding: 1rem;
+  margin-top: -0.25rem;
+}
+
+.chart-panel h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.95rem;
+  color: #e0e0e0;
 }
 
 .loading-message {
