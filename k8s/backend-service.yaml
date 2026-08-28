@@ -3,6 +3,7 @@ kind: Service
 metadata:
   name: backend
 spec:
+  type: 
   selector:
     app: backend
   ports:
