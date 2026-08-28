@@ -9,14 +9,6 @@ app.use(cors());                          // enable CORS for all routes
 let latestResults = [];
 let history = {};
 
-/* defining a route handler and checking the health of the server
-app.get("/health", (req, res) => {
-  res.json({ status: "OK" });
-});
- starting the server and listening on port 4000
- app.listen(4000, () => {console.log("Server is running on port 4000")});
-*/
-
 app.get("/health", (req, res) => {
   res.json({ status: "OK" });
 });
@@ -30,7 +22,10 @@ app.listen(config.port, () => {
 async function checkService(service) {     // async because we are using await inside the function
     const start = Date.now();     // record the start time of the request
   try {   // try if anything goes wrong with the fetch request it will be caught in the catch block
-    const response = await fetch(service.URL);     // send the request to the service URL and waits for the response
+    const controller = new AbortController();                      // create an abort controller to set a timeout
+    const timeout = setTimeout(() => controller.abort(), 10000);   // abort the request after 10 seconds
+    const response = await fetch(service.URL, { signal: controller.signal });     // send the request to the service URL and waits for the response
+    clearTimeout(timeout);                                         // clear the timeout if the request completes in time
     const responseTime = Date.now() - start;     // calculate the response time by subtracting the start time from the current time
     return {     // build and return the success report 
       name: service.name,
@@ -60,26 +55,30 @@ async function checkAllServices() { // checks all services at once (concurrently
   );
   return results;
 }
-// run all checks once right away, so we have data on startup
-checkAllServices().then(results => {
-  latestResults = results;
-});
 
-// then run all checks every 30 seconds
-setInterval(async () => {
-  latestResults = await checkAllServices();
-// store the results in history
-  latestResults.forEach(result => {
+// store the results in the history object, keeping only the last 100 results for each service
+function storeResults(results) {
+  results.forEach(result => {
     if (!history[result.name]) {
       history[result.name] = [];
     }
-    // keep only the last 100 results for each service
     history[result.name].push(result);
     if (history[result.name].length > 100) {
       history[result.name].shift();
     }
   });
+}
 
+// run all checks once right away, so we have data on startup
+checkAllServices().then(results => {
+  latestResults = results;
+  storeResults(results); // also store the first batch in history
+});
+
+// then run all checks every 30 seconds
+setInterval(async () => {
+  latestResults = await checkAllServices();
+  storeResults(latestResults);
   console.log("Checks updated at", new Date().toISOString());
 }, 30000);
 
