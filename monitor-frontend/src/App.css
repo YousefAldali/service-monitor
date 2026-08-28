@@ -42,3 +42,25 @@ h1 {
 .card.down .status {
   color: #ef4444;
 }
+
+.loading-message {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 1.1rem;
+}
+
+.error-message {
+  text-align: center;
+  color: #ef4444;
+  font-size: 1.1rem;
+}
+
+.error-banner {
+  text-align: center;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid #ef4444;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+}

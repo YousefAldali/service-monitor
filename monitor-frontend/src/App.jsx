@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import './App.css';
 function App() {
   const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
   useEffect(() => {
     // a function that fetches the status from the backend
@@ -11,8 +13,12 @@ function App() {
         const response = await fetch("/api/status"); // fetch the status from the backend 
         const data = await response.json();
         setServices(data);
-      } catch (error) { // if the fetch fails, log the error
-        console.error("Failed to fetch status:", error);
+        setError(null);
+        setLoading(false);
+      } catch (err) { // if the fetch fails, log the error
+        console.error("Failed to fetch status:", err);
+        setError("Unable to reach the backend server.");
+        setLoading(false);
       }
     };
 
@@ -25,10 +31,32 @@ function App() {
     // cleanup: stop the timer if the component goes away
     return () => clearInterval(interval);
   }, []);
+
+  // show a loading message while waiting for the first response
+  if (loading) {
+    return (
+      <div className="dashboard">
+        <h1>Service Monitor</h1>
+        <p className="loading-message">Loading services...</p>
+      </div>
+    );
+  }
+
+  // show an error message if the backend is unreachable
+  if (error && services.length === 0) {
+    return (
+      <div className="dashboard">
+        <h1>Service Monitor</h1>
+        <p className="error-message">{error}</p>
+      </div>
+    );
+  }
+
 // render the dashboard with the service status
    return (
     <div className="dashboard">
       <h1>Service Monitor</h1>
+      {error && <p className="error-banner">{error}</p>}
       <div className="cards">
         {services.map((service) => (
        <div className={`card ${service.status.toLowerCase()}`} key={service.name}>   
