@@ -3,9 +3,11 @@ const config = require('./config.json'); // calling the config.json file
 const app = express();                  // creating an express app
 const cors = require('cors');                 
 app.use(cors());                          // enable CORS for all routes 
+app.use(express.json());                  // parse JSON request bodies
 // this is needed because the frontend and backend are on different ports (3000 and 4000)
 // this allows the frontend to make requests to the backend without being blocked by the browser's same-origin policy
 
+let services = [...config.services];      // mutable copy of the service list so we can add/remove at runtime
 let latestResults = [];
 let history = {};
 
@@ -51,7 +53,7 @@ async function checkService(service) {     // async because we are using await i
 
 async function checkAllServices() { // checks all services at once (concurrently)
   const results = await Promise.all(
-    config.services.map(service => checkService(service))
+    services.map(service => checkService(service))
   );
   return results;
 }
@@ -94,4 +96,37 @@ app.get("/history/:name", (req, res) => {
   const name = req.params.name;
   const serviceHistory = history[name] || [];
   res.json(serviceHistory);
+});
+
+// add a new service to monitor
+app.post("/services", async (req, res) => {
+  const { name, URL } = req.body;
+  // validate that name and URL are provided
+  if (!name || !URL) {
+    return res.status(400).json({ error: "name and URL are required" });
+  }
+  // check if a service with the same name already exists
+  if (services.find(s => s.name === name)) {
+    return res.status(409).json({ error: "service with this name already exists" });
+  }
+  services.push({ name, URL });
+  // run a check right away so it shows up on the dashboard immediately
+  const result = await checkService({ name, URL });
+  latestResults.push(result);
+  storeResults([result]);
+  res.status(201).json({ message: "service added", service: { name, URL } });
+});
+
+// remove a monitored service by name
+app.delete("/services/:name", (req, res) => {
+  const name = req.params.name;
+  const index = services.findIndex(s => s.name === name);
+  if (index === -1) {
+    return res.status(404).json({ error: "service not found" });
+  }
+  services.splice(index, 1);
+  // also remove it from latest results so it disappears from the dashboard
+  latestResults = latestResults.filter(r => r.name !== name);
+  delete history[name];
+  res.json({ message: "service removed" });
 });

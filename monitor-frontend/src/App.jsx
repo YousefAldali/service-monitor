@@ -10,6 +10,8 @@ function App() {
   const [selectedService, setSelectedService] = useState(null);
   const [historyData, setHistoryData] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newURL, setNewURL] = useState("");
 
   useEffect(() => {
     // a function that fetches the status from the backend
@@ -67,6 +69,43 @@ function App() {
     setHistoryLoading(false);
   };
 
+  // add a new service to monitor
+  const handleAddService = async (e) => {
+    e.preventDefault();
+    if (!newName.trim() || !newURL.trim()) return;
+
+    try {
+      const response = await fetch("/api/services", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName.trim(), URL: newURL.trim() }),
+      });
+      if (response.ok) {
+        setNewName("");
+        setNewURL("");
+      }
+    } catch (err) {
+      console.error("Failed to add service:", err);
+    }
+  };
+
+  // remove a service from monitoring
+  const handleRemoveService = async (serviceName, e) => {
+    e.stopPropagation(); // don't trigger the card click (history chart)
+    try {
+      await fetch(`/api/services/${encodeURIComponent(serviceName)}`, {
+        method: "DELETE",
+      });
+      // if the deleted service was selected, close its chart
+      if (selectedService === serviceName) {
+        setSelectedService(null);
+        setHistoryData([]);
+      }
+    } catch (err) {
+      console.error("Failed to remove service:", err);
+    }
+  };
+
   // show a loading message while waiting for the first response
   if (loading) {
     return (
@@ -100,6 +139,24 @@ function App() {
           ⚠ {downServices.length} {downServices.length === 1 ? "service is" : "services are"} down: {downServices.map(s => s.name).join(", ")}
         </div>
       )}
+
+      {/* form to add a new service */}
+      <form className="add-form" onSubmit={handleAddService}>
+        <input
+          type="text"
+          placeholder="Service name"
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+        />
+        <input
+          type="url"
+          placeholder="https://example.com"
+          value={newURL}
+          onChange={(e) => setNewURL(e.target.value)}
+        />
+        <button type="submit">Add</button>
+      </form>
+
       <div className="cards">
         {services.map((service) => (
           <div key={service.name}>
@@ -107,7 +164,16 @@ function App() {
               className={`card ${service.status.toLowerCase()} ${selectedService === service.name ? "selected" : ""}`}
               onClick={() => handleCardClick(service.name)}
             >
-              <h2>{service.name}</h2>
+              <div className="card-header">
+                <h2>{service.name}</h2>
+                <button
+                  className="remove-btn"
+                  onClick={(e) => handleRemoveService(service.name, e)}
+                  title="Remove service"
+                >
+                  ✕
+                </button>
+              </div>
               <p className="status">{service.status}</p>
               <p>Response time: {service.responseTime} ms</p>
               <p>Status code: {service.statusCode ?? "N/A"}</p>
