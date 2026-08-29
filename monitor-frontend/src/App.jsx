@@ -87,11 +87,19 @@ function App() {
     );
   }
 
+  // filter out the services that are currently down to show an alert banner
+  const downServices = services.filter(s => s.status === "DOWN");
+
   // render the dashboard with the service status
   return (
     <div className="dashboard">
       <h1>Service Monitor</h1>
       {error && <p className="error-banner">{error}</p>}
+      {downServices.length > 0 && (
+        <div className="alert-banner">
+          ⚠ {downServices.length} {downServices.length === 1 ? "service is" : "services are"} down: {downServices.map(s => s.name).join(", ")}
+        </div>
+      )}
       <div className="cards">
         {services.map((service) => (
           <div key={service.name}>

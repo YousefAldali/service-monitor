@@ -95,3 +95,14 @@ h1 {
   padding: 0.5rem 1rem;
   margin-bottom: 1rem;
 }
+
+.alert-banner {
+  text-align: center;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid #fbbf24;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+}
